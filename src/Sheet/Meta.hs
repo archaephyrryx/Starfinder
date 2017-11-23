@@ -1,19 +1,7 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Sheet.Meta where
 
-data CharMeta =
-  CharMeta { name :: String
-           , classes :: Classes
-           , race :: Race
-           , theme :: Theme
-           , size :: Size
-           , speed :: Speed
-           , gender :: Gender
-           , homeworld :: Homeworld
-           , alignment :: Alignment
-           , deity :: Deity
-           , player :: String
-           , description :: [String]
-           } deriving (Eq, Show)
+import Control.Lens
 
 type Classes = String
 type Race = String
@@ -24,3 +12,20 @@ type Gender = String
 type Homeworld = String
 type Alignment = String
 type Deity = String
+
+data CharMeta =
+  CharMeta { _name :: String
+           , _classes :: Classes
+           , _race :: Race
+           , _theme :: Theme
+           , _size :: Size
+           , _speed :: Speed
+           , _gender :: Gender
+           , _homeworld :: Homeworld
+           , _alignment :: Alignment
+           , _deity :: Deity
+           , _player :: String
+           , _description :: [String]
+           } deriving (Eq, Show)
+
+makeLenses ''CharMeta

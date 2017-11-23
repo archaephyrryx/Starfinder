@@ -5,9 +5,11 @@ module Main where
 import Widgets.MultiSelect
 import Widgets.Core
 import Data.List
+--import App.Meta (app)
+import App.Record (app)
 
 main :: IO ()
-main = start test
+main = start app
 
 anthology :: [String]
 anthology =
@@ -33,7 +35,7 @@ test = do
     choicer <- multiListBox f []
     choice <- staticText f []
 
-    set f [layout := margin 10 $ grid 10 5 $ [[minsize (sz 200 300) $ widget choicer, glue, widget clear], [widget choice]] ]
+    set f [layout := margin 10 $ grid 10 5 [[minsize (sz 200 300) $ widget choicer, glue, widget clear], [widget choice]] ]
 
     let networkDescription :: MomentIO ()
         networkDescription = mdo

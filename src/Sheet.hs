@@ -1,27 +1,23 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Sheet where
 
+import Control.Lens
 import Sheet.Itemized
 import Sheet.Calculated
 import Sheet.Meta
 
 data Sheet =
-  Sheet { meta :: CharMeta
-        , scores :: AbilityScores
-        , skills :: SkillBlock
-        , stats :: Stats
-        , attacks :: Weapons
-        , armor :: Armor
-        , abilities :: Abilities
-        , feats :: Feats
-        , langs :: Languages
-        , equip :: Equipment
-        , exp :: Experience
+  Sheet { _meta :: CharMeta
+        , _scores :: AbilityScores
+        , _skills :: SkillBlock
+        , _stats :: Stats
+        , _attacks :: Weapons
+        , _armor :: Armor
+        , _abilities :: Abilities
+        , _feats :: Feats
+        , _langs :: Languages
+        , _equip :: Equipment
+        , _exp :: Experience
         } deriving (Eq, Show)
 
-defaultAbilityScores = AbilityScores 10 10 10 10 10 10
-
-blankSheet :: Sheet
-blankSheet = Sheet { meta = blankMeta
-                   , abilityScores = defaultAbilityScores
-                   ,
-
+makeLenses ''Sheet

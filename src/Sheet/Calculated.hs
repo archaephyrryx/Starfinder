@@ -1,7 +1,9 @@
-{-# LANGUAGE GADTs, DataKinds #-}
+{-# LANGUAGE GADTs, DataKinds, RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Sheet.Calculated where
 
+import Control.Lens
 import Sheet.Itemized
 import Sheet.Common
 
@@ -16,57 +18,65 @@ data AScore = Strength
             deriving (Eq, Ord, Read, Show, Enum)
 
 data AbilityScores =
-  AbilityScores { str :: AbScore
-                , dex :: AbScore
-                , con :: AbScore
-                , int :: AbScore
-                , wis :: AbScore
-                , cha :: AbScore
+  AbilityScores { _str :: AbScore
+                , _dex :: AbScore
+                , _con :: AbScore
+                , _int :: AbScore
+                , _wis :: AbScore
+                , _cha :: AbScore
                 } deriving (Eq, Show)
 
 type AbScore = Int
+
 
 abilityMod :: AbScore -> Int
 abilityMod n = (n`div`2) - 5
 
 getScore :: AbilityScores -> AScore -> AbScore
 getScore x k =
-  (!!fromEnum k) $ map ($x) [str, con, dex, int, wis, cha]
+  (!!fromEnum k) $ map ($ x) [_str, _con, _dex, _int, _wis, _cha]
 
 -- Skills
 
 data SkillBlock =
-  SkillBlock { ranksPerLevel :: Int
-             , values :: [SkillStat]
+  SkillBlock { _rpl :: Int
+             , _values :: SkillStats
              } deriving (Eq, Show, Read)
+
+
+
+type SkillStats = [SkillStat]
 
 type SkillName = String
 
 data SkillStat =
-  Skill { skillname :: SkillName
-        , classSkill :: Bool
-        , acpen :: Bool
-        , trained :: Bool
-        , ability :: AScore
-        , ranks :: Int
+  Skill { _skillname :: SkillName
+        , _classSkill :: Bool
+        , _acpen :: Bool
+        , _trained :: Bool
+        , _ability :: AScore
+        , _ranks :: Int
         } deriving (Eq, Show, Read)
+
+
 
 -- Statistical information
 
 data Stats =
-  Stats { initiative :: Initiative
-        , vitals :: Vitals
-        , ac :: ArmorClass
-        , saves :: SavingThrows
-        , bonuses :: AttackBonuses
+  Stats { _initiative :: Initiative
+        , _vitals :: Vitals
+        , _ac :: ArmorClass
+        , _saves :: SavingThrows
+        , _bonuses :: AttackBonuses
         } deriving (Eq, Show, Read)
+
 
 --- Initiative
 
 type Initiative = (Int, Int)
 
 genInitiative :: Int -> AbilityScores -> Initiative
-genInitiative n x = (dex x, n)
+genInitiative n x = (_dex x, n)
 
 initTotal :: Initiative -> Int
 initTotal = uncurry (+)
@@ -76,10 +86,11 @@ initTotal = uncurry (+)
 type MaxCurrent = (Int, Int)
 
 data Vitals =
-  Vitals { stamina :: MaxCurrent
-         , hp :: MaxCurrent
-         , resolve :: MaxCurrent
+  Vitals { _stamina :: MaxCurrent
+         , _hp :: MaxCurrent
+         , _resolve :: MaxCurrent
          } deriving (Eq, Show, Read)
+
 
 --- ArmorClass
 
@@ -87,16 +98,17 @@ data Vitals =
 --   Header record type storing the miscellaneous modifiers
 --   for each type of armor class, as well as DR and resistances
 data ArmorClass =
-  ArmorClass { eacMisc :: Int
-             , kacMisc :: Int
-             , dr :: Int
-             , resist :: [Resistance]
+  ArmorClass { _eacMisc :: Int
+             , _kacMisc :: Int
+             , _dr :: Int
+             , _resist :: [Resistance]
              } deriving (Eq, Show, Read)
+
 
 type Resistance = (DamageType, Int)
 
 acDexMod :: Armor -> AbilityScores -> Int
-acDexMod arm ab = min (maxdex arm) (dex ab)
+acDexMod arm ab = min (_maxdex arm) (_dex ab)
 
 baseAC :: Int
 baseAC = 10
@@ -105,33 +117,36 @@ cmdBonus :: Int
 cmdBonus = 8
 
 eac, kac :: Armor -> AbilityScores -> ArmorClass -> Int
-eac arm ab ac = baseAC + armorEAC arm + acDexMod arm ab + eacMisc ac
-kac arm ab ac = baseAC + armorKAC arm + acDexMod arm ab + kacMisc ac
+eac arm ab ac = baseAC + _armorEAC arm + acDexMod arm ab + _eacMisc ac
+kac arm ab ac = baseAC + _armorKAC arm + acDexMod arm ab + _kacMisc ac
 
 --- Saving Throws
 
 data SavingThrows =
-  Saves { fort :: Save
-        , ref  :: Save
-        , will :: Save
+  Saves { _fort :: Save
+        , _ref  :: Save
+        , _will :: Save
         } deriving (Eq, Show, Read)
 
-data Save where
-  Fortitude, Reflex, Will :: Int -> Int -> Save
-  deriving (Show, Read, Eq)
+
+data Save = Fortitude { _base :: Int, _misc :: Int }
+          | Reflex { _base :: Int, _misc :: Int }
+          | Will { _base :: Int, _misc :: Int }
+          deriving (Show, Read, Eq)
+
 
 calculateSave :: Save -> AbilityScores -> Int
-calculateSave (Fortitude x y) ab = x + y + (con ab)
-calculateSave (Reflex x y) ab = x + y + (dex ab)
-calculateSave (Will x y) ab = x + y + (wis ab)
+calculateSave Fortitude{..} ab = _base + _misc + _con ab
+calculateSave Reflex{..} ab = _base + _misc + _dex ab
+calculateSave Will{..} ab = _base + _misc + _wis ab
 
 --
 
 data AttackBonuses =
-  AttackBonuses { bab :: Int
-                , meleeMisc :: Int
-                , rangedMisc :: Int
-                , thrownMisc :: Int
+  AttackBonuses { _bab :: Int
+                , _meleeMisc :: Int
+                , _rangedMisc :: Int
+                , _thrownMisc :: Int
                 } deriving (Read, Show, Eq)
 
 
@@ -141,8 +156,17 @@ getAttackBonus Ranged = rangedBonus
 getAttackBonus Thrown = thrownBonus
 
 meleeBonus, rangedBonus, thrownBonus :: AttackBonuses -> AbilityScores -> Int
-meleeBonus bon ab = ((+) <$> bab <*> meleeMisc $ bon) + str ab
-rangedBonus bon ab = ((+) <$> bab <*> rangedMisc $ bon) + dex ab
-thrownBonus bon ab = ((+) <$> bab <*> thrownMisc $ bon) + str ab
+meleeBonus bon ab = ((+) <$> _bab <*> _meleeMisc $ bon) + _str ab
+rangedBonus bon ab = ((+) <$> _bab <*> _rangedMisc $ bon) + _dex ab
+thrownBonus bon ab = ((+) <$> _bab <*> _thrownMisc $ bon) + _str ab
 
 type Experience = Int
+
+makeLenses ''AbilityScores
+makeLenses ''SkillBlock
+makeLenses ''SkillStat
+makeLenses ''Stats
+makeLenses ''Vitals
+makeLenses ''ArmorClass
+makeLenses ''Save
+makeLenses ''SavingThrows

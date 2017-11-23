@@ -1,7 +1,14 @@
-{-# LANGUAGE GADTs, DataKinds, KindSignatures, StandaloneDeriving, FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE DataKinds #-}
+--{-# LANGUAGE KindSignatures #-}
+--{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Sheet.Itemized where
 
+import Control.Lens
 import Sheet.Common
 import Data.List
 import Data.Char
@@ -28,7 +35,6 @@ weaponAttack x = case x of
                    Grenade -> Thrown
 
 
-type Weapons = [Weapon]
 
 data Die = D4
          | D6
@@ -40,22 +46,31 @@ data Die = D4
 
 type Count = Int
 
-data Dice = Dice Count Die
-  deriving (Eq, Ord)
+data Dice = Dice { _count :: Count
+                 , _die :: Die
+                 } deriving (Eq, Ord)
+
 
 instance Show Dice where
-  show (Dice i x) = (show i)++(map toLower . show $ x)
+  show Dice{..} = show _count++(map toLower . show $ _die)
 
 instance Read Dice where
   readsPrec _ str =
     let (count,face) = span isDigit str
      in [(Dice (read count) (read . map toUpper $ str), "")]
 
-data Damage = Dmg { dice :: Dice, dmgBonus :: Int }
+makeLenses ''Dice
+
+data Damage = Dmg
+  { _dice :: Dice
+  , _dmgBonus :: Int
+  }
   deriving (Eq, Read)
 
+makeLenses ''Damage
+
 instance Show Damage where
-  show x = show (dice x) ++ '+':(show (dmgBonus x))
+  show Dmg{..} = show _dice ++ '+':show _dmgBonus
 
 type CritEffects = [String]
 
@@ -74,22 +89,30 @@ type SpecialProperties = [SpecialProperty]
 type SpecialProperty = String
 
 data Weapon =
-  MeleeWeapon { weptype :: WeaponType
-              , powered :: Energy
-              , level :: Int
-              , abMisc :: Int
-              , damage :: Damage
-              , crit :: CritEffects
-              , dmgType :: DamageType
-              , special :: SpecialProperties
-              }
-              deriving (Eq, Read, Show)
+    Weapon { _weptype :: WeaponType
+           , _powered :: Energy
+           , _level :: Int
+           , _abMisc :: Int
+           , _damage :: Damage
+           , _crit :: CritEffects
+           , _dmgType :: DamageType
+           , _range :: Maybe Int
+           , _maxusage :: Maybe (Int, Int)
+           , _special :: SpecialProperties
+           }
+           deriving (Eq, Read, Show)
 
-data Armor = Armor { armorKAC :: Int
-                   , armorEAC :: Int
-                   , maxdex :: Int
-                   , penalty :: Int
+type Weapons = [Weapon]
+
+makeLenses ''Weapon
+
+data Armor = Armor { _armorKAC :: Int
+                   , _armorEAC :: Int
+                   , _maxdex :: Int
+                   , _penalty :: Int
                    } deriving (Eq, Read, Show)
+
+makeLenses ''Armor
 
 type Abilities = [Ability]
 
@@ -98,18 +121,21 @@ data AbilityType = Extraordinary
                  | SpellLike
                  deriving (Ord, Eq, Enum, Read, Show)
 
-data Ability = Ability { abilityName :: String
-                       , abilityType :: AbilityType
-                       , description :: String
+data Ability = Ability { _abilityName :: String
+                       , _abilityType :: AbilityType
+                       , _abilityText :: String
                        } deriving (Eq, Read, Show)
 
+makeLenses ''Ability
 
 type Feats = [Feat]
 
-data Feat = Feat { featName :: String
-                 , isCombat :: Bool
-                 , featDescription :: String
+data Feat = Feat { _featName :: String
+                 , _isCombat :: Bool
+                 , _featDescription :: String
                  } deriving (Eq, Show, Read)
+
+makeLenses ''Feat
 
 type Languages = [String]
 type Equipment = [GearItem]
@@ -135,8 +161,10 @@ data Bulk = Negligible
           | Mass Int
           deriving (Ord, Eq, Show, Read)
 
-data GearItem = GearItem { category :: GearCategory
-                         , gearlevel :: Int
-                         , gearBulk :: Bulk
-                         , gearQuantity :: Int
+data GearItem = GearItem { _category :: GearCategory
+                         , _gearlevel :: Int
+                         , _gearBulk :: Bulk
+                         , _gearQuantity :: Int
                          } deriving (Eq, Show, Read)
+
+makeLenses ''GearItem
