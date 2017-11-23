@@ -11,6 +11,8 @@ import Widgets.Fields
 import Widgets.Links
 import Util (titleCase)
 import Widgets.Cast (lbTranspose)
+import Widgets.Recorder
+
 
 app :: IO ()
 app = do
@@ -22,15 +24,10 @@ app = do
   let networkDescription :: MomentIO ()
       networkDescription = mdo
            field <- field' c "Foo" bVal
-           bVal <- stepper "" $ priorityUnion [ portents field, eLoad ]
+           lrecord <- recorder c bVal (pure "Save") "Load" (pure "dump.dump")
+           bVal <- stepper "" $ priorityUnion [ portents field, portents lrecord ]
 
-           lSave <- (liftIO (preLink c) >>= \l -> liquidLink l (pure $ const "Save") (omens field))
-           lLoad <- (liftIO (preLink c) >>= \l -> voidLink l "Load")
-           eLoad <- mapEventIO (\_ -> readFile "dump.dump") (portents lLoad)
-
-           lSave`sinksTo`writeFile "dump.dump"
-
-           liftIO $ set c [ layout := margin 10 $ column 5 [widget field, row 5 [ widget lSave, widget lLoad ] ] ]
+           liftIO $ set c [ layout := margin 10 $ column 5 [widget field, widget lrecord ] ]
 
   network <- compile networkDescription
   actuate network

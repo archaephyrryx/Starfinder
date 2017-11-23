@@ -86,6 +86,7 @@ executable sfgui
     Widgets.Phantom
     Widgets.Radio
     Widgets.Ranger
+    Widgets.Recorder
     Widgets.Table
     Widgets.Text
     Widgets.Tower
