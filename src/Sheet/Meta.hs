@@ -26,6 +26,6 @@ data CharMeta =
            , _deity :: Deity
            , _player :: String
            , _description :: [String]
-           } deriving (Eq, Show)
+           } deriving (Eq, Show, Read)
 
 makeLenses ''CharMeta

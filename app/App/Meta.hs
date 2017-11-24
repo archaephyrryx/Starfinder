@@ -3,13 +3,16 @@ module App.Meta where
 
 import Sheet
 import Sheet.Meta
-import Widgets.Core
+import Widgets.Core hiding (set, size, alignment)
+import qualified Widgets.Core as Widgets (set)
 import Widgets.Table
 import Widgets.Input
 import Widgets.Text
 import Widgets.Fields
 import Util (titleCase)
 import Widgets.Cast (lbTranspose)
+import Widgets.Recorder
+import Control.Lens
 
 createField :: Window w -> String -> MomentIO Field
 createField w str = mdo
@@ -24,8 +27,6 @@ createFieldML w str = mdo
   bVal <- stepper "" $ portents field
   return field
 
-
-
 mapLast :: (a -> b) -> (a -> b) -> [a] -> [b]
 mapLast _ _ [] = []
 mapLast _ g [x] = [g x]
@@ -33,6 +34,23 @@ mapLast f g (x:xs) = f x : mapLast f g xs
 
 fields :: [String]
 fields = map titleCase ["name", "classes", "race", "theme", "size", "speed", "gender", "homeworld", "alignment", "deity", "player", "description"]
+
+metaFields :: Window w -> Behavior CharMeta -> [MomentIO Field]
+metaFields c bMeta =
+  let f s g = field' c s (g <$> bMeta)
+   in [ f "Name" _name
+      , f "Class" _classes
+      , f "Race" _race
+      , f "Theme" _theme
+      , f "Size" _size
+      , f "Speed" _speed
+      , f "Gender" _gender
+      , f "Homeworld" _homeworld
+      , f "Alignment" _alignment
+      , f "Deity" _deity
+      , f "Player" _player
+      , fieldML c "Description" (unlines . _description <$> bMeta)
+      ]
 
 app :: IO ()
 app = do
@@ -45,14 +63,30 @@ app = do
 
   let networkDescription :: MomentIO ()
       networkDescription = mdo
-           fMetaFields <- sequence $ mapLast (createField c) (createFieldML c) fields
-           let bFieldValues = map omens fMetaFields
-               bMeta = metaBehavior bFieldValues
+           fMetaFields <- sequence $ metaFields c bMeta
+           let [fNam, fCla, fRac, fThe, fSiz, fSpe, fGen, fHom, fAli, fDei, fPla, fDes] = fMetaFields
 
+           bMeta <- accumB (metaList $ replicate 12 "") $
+             priorityUnion [ const . read <$> portents lrecord
+                           , set name <$> portents fNam
+                           , set classes <$> portents fCla
+                           , set race <$> portents fRac
+                           , set theme <$> portents fThe
+                           , set size <$> portents fSiz
+                           , set speed <$> portents fSpe
+                           , set gender <$> portents fGen
+                           , set homeworld <$> portents fHom
+                           , set alignment <$> portents fAli
+                           , set deity <$> portents fDei
+                           , set player <$> portents fPla
+                           , set description . lines <$> portents fDes
+                           ]
+           let bVal = show <$> bMeta
+           lrecord <- recorder c bVal (pure "Save") "Load" (pure "dump.dump")
 
-           sink debug [ text :== show <$> bMeta ]
+           sink debug [ text :== show <$> bVal ]
 
-           liftIO $ set c [ layout := margin 10 $ column 5 [row 5 $ map widget fMetaFields, widget debug] ]
+           liftIO $ Widgets.set c [ layout := margin 10 $ column 5 [row 5 $ map widget fMetaFields, widget lrecord, widget debug ] ]
 
   network <- compile networkDescription
   actuate network
