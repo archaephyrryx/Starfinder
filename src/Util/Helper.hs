@@ -44,7 +44,7 @@ wrapped :: ([a] -> b) -> (a -> b)
 wrapped = (.one)
 
 -- |Converts a normal string-parser into a basic Read(er)
-rdr :: (String -> a) -> (ReadS a)
+rdr :: (String -> a) -> ReadS a
 rdr = (wrapped (`zip`[""]) .)
 
 -- | Composes a list of functions of type @a -> a@, effectively sequencially processing them in
@@ -65,9 +65,13 @@ procmap = (proc.).(.flip ($)).for
 -- |Constant on unit
 {-# INLINE unity #-}
 unity :: a -> (() -> a)
-unity x = (\() -> x)
+unity x () = x
 
 
+-- |Try to read, avoiding empty string parsing
+tryRead :: (Read a) => String -> Maybe a
+tryRead "" = Nothing
+tryRead x = Just $ read x
 
 -- |Converts a string to titlecase (first character uppercase, all others
 -- lowercase)
@@ -81,13 +85,13 @@ titleCase xs = case xs of
 fromLeft :: Either a b -> a
 fromLeft x = case x of
                (Left x) -> x
-               (Right y) -> error $ "fromLeft: (Right "++(reveal y)++")"
+               (Right y) -> error $ "fromLeft: (Right "++reveal y++")"
 
 
 -- | Partial function equivalent to (\(Right x) -> x), with informative error messages
 fromRight :: Either a b -> b
 fromRight x = case x of
-                (Left y) -> error $ "fromRight: (Left "++(reveal y)++")"
+                (Left y) -> error $ "fromRight: (Left "++reveal y++")"
                 (Right x) -> x
 
 -- | Non-partial version of `fromLeft` with a lazy default value

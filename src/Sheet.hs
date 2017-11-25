@@ -18,6 +18,6 @@ data Sheet =
         , _langs :: Languages
         , _equip :: Equipment
         , _exp :: Experience
-        } deriving (Eq, Show)
+        } deriving (Eq, Show, Read)
 
 makeLenses ''Sheet

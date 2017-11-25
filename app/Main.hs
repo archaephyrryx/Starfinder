@@ -5,8 +5,9 @@ module Main where
 import Widgets.MultiSelect
 import Widgets.Core
 import Data.List
-import App.Meta (app)
+--import App.Meta (app)
 --import App.Record (app)
+import App.Calculated (app)
 
 main :: IO ()
 main = start app

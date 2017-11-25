@@ -1,13 +1,102 @@
-{-# LANGUAGE GADTs, DataKinds, RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE RecursiveDo #-}
+module App.Calculated where
 
-module Sheet.Calculated where
-
+import Sheet
+import Sheet.Calculated
+import Widgets.Core hiding (set)
+import qualified Widgets.Core as Widgets (set)
+import Widgets.Table
+import Widgets.Fields
+import Widgets.Links
+import Util (titleCase)
+import Widgets.Recorder
 import Control.Lens
-import Sheet.Itemized
-import Sheet.Common
 
--- Ability Scores
+createField :: Window w -> String -> MomentIO TextField
+createField w str = mdo
+  field <- field' w str bVal
+  bVal <- stepper "" $ portents field
+  return field
+
+
+createFieldML :: Window w -> String -> MomentIO TextField
+createFieldML w str = mdo
+  field <- fieldML w str bVal
+  bVal <- stepper "" $ portents field
+  return field
+
+
+
+mapLast :: (a -> b) -> (a -> b) -> [a] -> [b]
+mapLast _ _ [] = []
+mapLast _ g [x] = [g x]
+mapLast f g (x:xs) = f x : mapLast f g xs
+
+scoreFields :: Window w -> Behavior AbilityScores -> [MomentIO (Field Int)]
+scoreFields c bScores =
+  let f s g = intField c s (g <$> bScores)
+   in [ f "STR" _str
+      , f "DEX" _dex
+      , f "CON" _con
+      , f "INT" _int
+      , f "WIS" _wis
+      , f "CHA" _cha
+      ]
+
+skillFields :: Window w -> Behavior SkillBlock -> [MomentIO TextField]
+skillFields c bSkills = []
+
+
+statFields :: Window w -> Behavior Stats -> [MomentIO TextField]
+statFields c bStats = []
+
+
+{-
+data Mode = Edit | View deriving (Eq, Ord, Enum, Read, Show)
+
+modeFlip :: Mode -> Mode
+modeFlip Edit = View
+modeFlip View = Edit
+-}
+
+app :: IO ()
+app = do
+  w <- frame [ text := "Calculated" ]
+  nav <- table w []
+  content <- table w []
+  let c = _tab content
+
+  debug <- staticText c []
+
+  let networkDescription :: MomentIO ()
+      networkDescription = mdo
+           fScoreFields <- sequence $ scoreFields c bScores
+           let [fStr, fDex, fCon, fInt, fWis, fCha] = fScoreFields
+
+           -- lMode <- liftIO (preLink c) >>= \l -> liquidLink l (pure show) bMode
+           --bMode <- accumB Edit $ modeFlip <$ portents lMode
+
+           bScores <- accumB (AbilityScores 10 10 10 10 10 10) $
+             priorityUnion [ const . read <$> portents lrecord
+                           , set str <$> portents fStr
+                           , set dex <$> portents fDex
+                           , set con <$> portents fCon
+                           , set int <$> portents fInt
+                           , set wis <$> portents fWis
+                           , set cha <$> portents fCha
+                           ]
+           let bVal = show <$> bScores
+           lrecord <- recorder c bVal (pure "Save") "Load" (pure "dump.dump")
+
+           sink debug [ text :== show <$> bVal ]
+
+           liftIO $ Widgets.set c [ layout := margin 10 $ column 5 [row 5 $ map widget fScoreFields, widget lrecord, widget debug ] ]
+
+  network <- compile networkDescription
+  actuate network
+
+{-
+
 
 data AScore = Strength
             | Dexterity
@@ -24,7 +113,7 @@ data AbilityScores =
                 , _int :: AbScore
                 , _wis :: AbScore
                 , _cha :: AbScore
-                } deriving (Eq, Show, Read)
+                } deriving (Eq, Show)
 
 type AbScore = Int
 
@@ -170,3 +259,4 @@ makeLenses ''Vitals
 makeLenses ''ArmorClass
 makeLenses ''Save
 makeLenses ''SavingThrows
+-}
