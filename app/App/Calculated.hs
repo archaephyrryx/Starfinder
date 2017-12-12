@@ -1,12 +1,16 @@
-{-# LANGUAGE RecursiveDo #-}
+{-# LANGUAGE RecursiveDo, RecordWildCards, GADTs #-}
+{-# LANGUAGE FlexibleContexts      #-}
 module App.Calculated where
 
 import Sheet
 import Sheet.Calculated
-import Widgets.Core hiding (set)
+import Widgets.Core hiding (set, mask)
 import qualified Widgets.Core as Widgets (set)
 import Widgets.Table
 import Widgets.Fields
+import Widgets.Text
+import Widgets.Frame
+import Reactive.ValText
 import Widgets.Links
 import Util (titleCase)
 import Widgets.Recorder
@@ -32,9 +36,17 @@ mapLast _ _ [] = []
 mapLast _ g [x] = [g x]
 mapLast f g (x:xs) = f x : mapLast f g xs
 
-scoreFields :: Window w -> Behavior AbilityScores -> [MomentIO (Field Int)]
+metaIntField :: Window w -> String -> Behavior Int -> (Int -> Int) -> MomentIO (SyncFrame Int)
+metaIntField c str b f = do
+  fin <- intField c str b
+  fet <- (liftIO $ preText c) >>= \x -> rText' x (mask b (show.f)) (() <$ portents fin)
+  let _tiles = [GenItem fin, Internal fet]
+      _subject = tidings b $ b <@ portents fin
+  return SyncFrame {..}
+
+scoreFields :: Window w -> Behavior AbilityScores -> [MomentIO (SyncFrame Int)]
 scoreFields c bScores =
-  let f s g = intField c s (g <$> bScores)
+  let f s g = metaIntField c s (g <$> bScores) abilityMod
    in [ f "STR" _str
       , f "DEX" _dex
       , f "CON" _con
@@ -76,21 +88,22 @@ app = do
            -- lMode <- liftIO (preLink c) >>= \l -> liquidLink l (pure show) bMode
            --bMode <- accumB Edit $ modeFlip <$ portents lMode
 
+           let portents' = (\(GenItem x) -> portents x) . head . _tiles
            bScores <- accumB (AbilityScores 10 10 10 10 10 10) $
              priorityUnion [ const . read <$> portents lrecord
-                           , set str <$> portents fStr
-                           , set dex <$> portents fDex
-                           , set con <$> portents fCon
-                           , set int <$> portents fInt
-                           , set wis <$> portents fWis
-                           , set cha <$> portents fCha
+                           , set str <$> portents'  fStr
+                           , set dex <$> portents'  fDex
+                           , set con <$> portents'  fCon
+                           , set int <$> portents'  fInt
+                           , set wis <$> portents'  fWis
+                           , set cha <$> portents'  fCha
                            ]
            let bVal = show <$> bScores
            lrecord <- recorder c bVal (pure "Save") "Load" (pure "dump.dump")
 
            sink debug [ text :== show <$> bVal ]
 
-           liftIO $ Widgets.set c [ layout := margin 10 $ column 5 [row 5 $ map widget fScoreFields, widget lrecord, widget debug ] ]
+           liftIO $ Widgets.set c [ layout := margin 10 $ row 5 [column 5 $ map widget fScoreFields, widget lrecord, widget debug ] ]
 
   network <- compile networkDescription
   actuate network
