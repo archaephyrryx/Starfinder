@@ -1,0 +1,6 @@
+[submodule "frp-widgets-banana"]
+	path = frp-widgets-banana
+	url = git@github.com:archaephyrryx/frp-widgets-banana
+[submodule "futility"]
+	path = futility
+	url = git@github.com:archaephyrryx/futility

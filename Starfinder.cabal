@@ -16,33 +16,6 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules: Lib
-      Util
-      Util.Advanced
-      Util.Applicative
-      Util.Conditional
-      Util.Generic
-      Util.Helper
-      Util.List
-      Util.List.Safe
-      Util.List.Advanced
-      Util.String
-      Util.TH
-      Util.Tuple
-      Util.Tuple.Apply
-      Util.Tuple.Rotate
-      Data.Invotomorph
-      Data.Dimorph
-      Data.Morphism
-      Data.Stringent
-      Data.Morphism.Dimorph.Alt
-      Data.Morphism.Dimorph.Language
-      Data.Morphism.Dimorph.Parse
-      Data.Morphism.Dimorph.Prim
-      Data.Morphism.Dimorph.Quasi
-      Data.Morphism.Invotomorph.Prim
-      Data.Morphism.Language
-      Data.Morphism.Parse
-      Data.TypeCast
       Sheet
       Sheet.Itemized
       Sheet.Calculated
@@ -56,6 +29,7 @@ library
     containers >= 0.5,
     template-haskell >=2.11.1.0,
     split >=0.2,
+    futility >= 0.1,
     extra,
     parsec
   default-language:    Haskell2010
@@ -68,29 +42,6 @@ executable sfgui
     App.Meta
     App.Calculated
     App.Record
-    Reactive.Banana.WX
-    Reactive.StaticDynamic
-    Reactive.Tidings
-    Reactive.Util
-    Reactive.ValText
-    Widgets.Cast
-    Widgets.Core
-    Widgets.Core.FRP
-    Widgets.Core.UI
-    Widgets.Fields
-    Widgets.Group
-    Widgets.Input
-    Widgets.Links
-    Widgets.MonoSelect
-    Widgets.MultiSelect
-    Widgets.Obscura
-    Widgets.Phantom
-    Widgets.Radio
-    Widgets.Ranger
-    Widgets.Recorder
-    Widgets.Table
-    Widgets.Text
-    Widgets.Tower
   other-extensions:
         CPP,
         DeriveDataTypeable,
@@ -129,6 +80,8 @@ executable sfgui
         containers >=0.5 && <0.6,
         parsec,
         primitive,
+        futility >= 0.1,
+        frp-widgets-banana >= 0.1,
         Starfinder
   default-language:    Haskell2010
 

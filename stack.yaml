@@ -37,6 +37,9 @@ resolver: lts-9.12
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - .
+- ./futility
+- ./frp-widgets-banana
+
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps: [
