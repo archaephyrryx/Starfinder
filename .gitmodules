@@ -4,3 +4,6 @@
 [submodule "futility"]
 	path = futility
 	url = git@github.com:archaephyrryx/futility
+[submodule "frp-widgets-threepenny"]
+	path = frp-widgets-threepenny
+	url = git@github.com:archaephyrryx/frp-widgets-threepenny.git
