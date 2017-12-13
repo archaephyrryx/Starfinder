@@ -1,6 +1,6 @@
 module App.Home where
 
-import Widgets.Core
+import Widgets.Banana
 
 appname = "FRPony"
 

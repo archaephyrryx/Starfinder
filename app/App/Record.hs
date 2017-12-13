@@ -3,15 +3,10 @@ module App.Record where
 
 import Sheet
 import Sheet.Meta
-import Widgets.Core
-import Widgets.Input
-import Widgets.Text
-import Widgets.Table
-import Widgets.Fields
-import Widgets.Links
+
+import Widgets.Banana
+
 import Util (titleCase)
-import Widgets.Cast (lbTranspose)
-import Widgets.Recorder
 
 
 app :: IO ()

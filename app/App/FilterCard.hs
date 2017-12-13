@@ -8,7 +8,7 @@ import Control.Monad
 import Data.List
 import Data.Maybe
 -----------------------------
-import Widgets.Core
+import Widgets.Banana
 -----------------------------
 
 cardCaster :: CastType

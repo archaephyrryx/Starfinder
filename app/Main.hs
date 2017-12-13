@@ -2,8 +2,8 @@
 
 module Main where
 
-import Widgets.MultiSelect
-import Widgets.Core
+import Widgets.Banana.MultiSelect
+import Widgets.Banana.Core
 import Data.List
 --import App.Meta (app)
 --import App.Record (app)

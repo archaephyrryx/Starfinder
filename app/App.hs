@@ -1,12 +1,7 @@
 module App where
 
 -----------------------
-import Widgets.Table
-import Widgets.MultiSelect
-import Widgets.MonoSelect
-import Widgets.Links
-import Widgets.Radio
-import Widgets.Core
+import Widgets.Banana
 -----------------------
 import Data.List
 -----------------------

@@ -3,15 +3,11 @@ module App.Meta where
 
 import Sheet
 import Sheet.Meta
-import Widgets.Core hiding (set, size, alignment)
-import qualified Widgets.Core as Widgets (set)
-import Widgets.Table
-import Widgets.Input
-import Widgets.Text
-import Widgets.Fields
+
+import Widgets.Banana hiding (set, size, alignment)
+import qualified Widgets.Banana as Widgets (set)
+
 import Util (titleCase)
-import Widgets.Cast (lbTranspose)
-import Widgets.Recorder
 import Control.Lens
 
 createField :: Window w -> String -> MomentIO Field

@@ -4,16 +4,16 @@ module App.Calculated where
 
 import Sheet
 import Sheet.Calculated
-import Widgets.Core hiding (set, mask)
-import qualified Widgets.Core as Widgets (set)
-import Widgets.Table
-import Widgets.Fields
-import Widgets.Text
-import Widgets.Frame
+import Widgets.Banana.Core hiding (set, mask)
+import qualified Widgets.Banana.Core as Widgets (set)
+import Widgets.Banana.Table
+import Widgets.Banana.Fields
+import Widgets.Banana.Text
+import Widgets.Banana.Frame
+import Widgets.Banana.Links
+import Widgets.Banana.Recorder
 import Reactive.ValText
-import Widgets.Links
 import Util (titleCase)
-import Widgets.Recorder
 import Control.Lens
 
 createField :: Window w -> String -> MomentIO TextField
