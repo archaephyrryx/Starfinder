@@ -8,21 +8,19 @@ import Control.Monad
 import Data.List
 import Data.Maybe
 -----------------------------
-import Widgets.Banana
+import qualified Graphics.UI.Threepenny          as UI
+import qualified Graphics.UI.Threepenny.Core     as UI
+import qualified Graphics.UI.Threepenny.Elements as UI
+import Graphics.UI.Threepenny.Core hiding (get, set)
 -----------------------------
-
-cardCaster :: CastType
-cardCaster = Cask { bContents = bAnthology
-                  , pagesize = page
-                  , current = tidings bCurrent $ portents ranged
-                  , format = Format { label = Static stringify
-                                    , wrap = Static (\s l -> tabulate s l)
-                                    , collect = Static id
-                                    }
-                  }
-
-tabulate :: UniCard c => c -> Link Int -> Row
-tabulate = Row [ Item
+import App.Core
+import App.Universal
+import App.Widgets
+import App.Filtering
+-----------------------------
+import Renderer.FilterCard
+import Renderer.Cards
+-----------------------------
 
 {-
 theader :: UI Element
@@ -52,7 +50,7 @@ freeRange :: [UI Element] -> UI Element
 freeRange xs = column (map (\x -> row [ x ]) xs)
 
 fcAmsHeader :: AMS -> UI Element
-fcAmsHeader a@AMS{..} = do
+fcAmsHeader a@AMS{..} = do 
         uiSelectTyp <- namedMultiSelect "Type"   clearsTyp uSelectTyp
         uiSelectCol <- namedMultiSelect "Color"  clearsCol uSelectCol
         uiSelectSet <- namedMultiSelect "Set"    clearsSet uSelectSet

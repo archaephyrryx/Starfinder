@@ -39,6 +39,9 @@ executable sfgui
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   other-modules: 
+    App.Banana.Calculated
+    App.Banana.Meta
+    App.Banana.Record
     App.Meta
     App.Calculated
     App.Record
