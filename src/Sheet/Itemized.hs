@@ -91,6 +91,7 @@ type SpecialProperty = String
 data Weapon =
     Weapon { _weptype :: WeaponType
            , _powered :: Energy
+           , _wepname :: String
            , _level :: Int
            , _abMisc :: Int
            , _damage :: Damage
