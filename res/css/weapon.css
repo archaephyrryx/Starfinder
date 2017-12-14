@@ -1,0 +1,71 @@
+table, th, td {
+    border: 1px solid black;
+}
+
+tr {
+    border: 1px solid black;
+    height: auto;
+}
+
+.weapon {
+        min-width: 200px;
+}
+
+.heading {
+    font-size: 7pt;
+    vertical-align: top;
+}
+
+.level {
+    width: 30px;
+    text-align: center;
+}
+
+.attack-bonus {
+    width: 45px;
+    text-align: center;
+}
+
+.damage {
+    width: 55px;
+    text-align: left;
+}
+
+.critical {
+    width: 95px;
+    text-align: left;
+}
+
+
+.range {
+    width: 25px;
+    text-align: center;
+}
+
+.type {
+    width: 45px;
+    text-align: left;
+}
+
+.ammo {
+    width: 75px;
+    text-align: left;
+}
+
+.special {
+    width: 55px;
+    text-align: center;
+}
+
+h2 {
+    margin: 5px;
+    background-color: darkblue;
+    background-size: cover;
+    text-align: center;
+    vertical-align: middle;
+    color: white;
+    width: 115px;
+    height: 35px;
+    font-family: sans-serif;
+    font-variant-caps: all-small-caps;
+}

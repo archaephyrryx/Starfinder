@@ -12,13 +12,20 @@ import Control.Lens hiding (set, (#), element)
 import Sheet
 import Sheet.Itemized
 
+import Data.Wrapped
+
 setup :: Window -> UI ()
 setup window = void $ do
     return window # UI.set UI.title "Weapon Stat"
+    UI.addStyleSheet window "weapon.css"
 
     wep <- display sampleWep
 
     getBody window #+ [ element wep ]
+
+listShow :: [String] -> String
+listShow [] = "-"
+listShow x = intercalate ", " x
 
 dashShow :: (Show a) => Maybe a -> String
 dashShow = maybe "-" show
@@ -32,11 +39,11 @@ display wep@Weapon{..} = UI.table #+ map (UI.tr #+)
     , (1, show _damage)
     ]
   , map (\(n,el) -> UI.td # set UI.colspan n #+ [UI.string el])
-    [ (1, intercalate ", " _crit)
-    , (1, show _dmgType)
+    [ (1, listShow _crit)
+    , (1, brief _dmgType)
     , (1, dashShow _range)
     , (2, dashShow _maxusage)
-    , (1, intercalate ", " _special)
+    , (1, listShow _special)
     ]
   ]
 

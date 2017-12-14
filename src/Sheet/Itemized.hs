@@ -5,6 +5,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module Sheet.Itemized where
 
@@ -12,6 +13,9 @@ import Control.Lens
 import Sheet.Common
 import Data.List
 import Data.Char
+import Data.Wrapped
+import qualified Data.Morphism as M
+import Data.Morphism (dimorph)
 
 type Energy = Bool
 
@@ -83,6 +87,25 @@ data DamageType = Bludgeoning
                 | Fire
                 | Sonic
                 deriving (Eq, Ord, Read, Show, Enum)
+
+
+[dimorph|
+  iso DamageType String
+    Bludgeoning <=> "B"
+    Piercing <=> "P"
+    Slashing <=> "S"
+    Acid <=> "A"
+    Cold <=> "C"
+    Electricity <=> "E"
+    Fire <=> "F"
+    Sonic <=> "So"
+|]
+
+instance Abbrev DamageType where
+  short = M.from di'DamageType'String
+  brief = M.to di'DamageType'String
+  long = read
+  verbose = show
 
 type SpecialProperties = [SpecialProperty]
 
