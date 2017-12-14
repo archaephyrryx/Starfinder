@@ -6,59 +6,9 @@ module Sheet.Calculated where
 import Control.Lens
 import Sheet.Itemized
 import Sheet.Common
+import Sheet.Skills
 
--- Ability Scores
-
-data AScore = Strength
-            | Dexterity
-            | Constitution
-            | Intelligence
-            | Wisdom
-            | Charisma
-            deriving (Eq, Ord, Read, Show, Enum)
-
-data AbilityScores =
-  AbilityScores { _str :: AbScore
-                , _dex :: AbScore
-                , _con :: AbScore
-                , _int :: AbScore
-                , _wis :: AbScore
-                , _cha :: AbScore
-                } deriving (Eq, Show, Read)
-
-type AbScore = Int
-
-
-abilityMod :: AbScore -> Int
-abilityMod n = (n`div`2) - 5
-
-getScore :: AbilityScores -> AScore -> AbScore
-getScore x k =
-  (!!fromEnum k) $ map ($ x) [_str, _con, _dex, _int, _wis, _cha]
-
--- Skills
-
-data SkillBlock =
-  SkillBlock { _rpl :: Int
-             , _values :: SkillStats
-             } deriving (Eq, Show, Read)
-
-
-
-type SkillStats = [SkillStat]
-
-type SkillName = String
-
-data SkillStat =
-  Skill { _skillname :: SkillName
-        , _classSkill :: Bool
-        , _acpen :: Bool
-        , _trained :: Bool
-        , _ability :: AScore
-        , _ranks :: Int
-        } deriving (Eq, Show, Read)
-
-
+import Data.Default
 
 -- Statistical information
 
@@ -162,9 +112,6 @@ thrownBonus bon ab = ((+) <$> _bab <*> _thrownMisc $ bon) + _str ab
 
 type Experience = Int
 
-makeLenses ''AbilityScores
-makeLenses ''SkillBlock
-makeLenses ''SkillStat
 makeLenses ''Stats
 makeLenses ''Vitals
 makeLenses ''ArmorClass

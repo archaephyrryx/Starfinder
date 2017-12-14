@@ -2,9 +2,13 @@
 module Sheet where
 
 import Control.Lens
+import Sheet.Common
 import Sheet.Itemized
 import Sheet.Calculated
 import Sheet.Meta
+import Sheet.Skills
+
+import Data.Default
 
 data Sheet =
   Sheet { _meta :: CharMeta
